@@ -1,0 +1,26 @@
+{
+  "name": "checkenbot",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
+    "serve": "ts-node-dev --respawn --transpile-only src/server.ts  "
+  },
+  "compilerOptions": {
+    "esModuleInterop": true
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "mongoose": "^7.4.0",
+    "telegraf": "^4.12.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.4",
+    "concurrently": "^8.2.0",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.1.6"
+  }
+}
