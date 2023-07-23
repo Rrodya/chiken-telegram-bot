@@ -1,6 +1,8 @@
+import { model } from "mongoose";
+
 const mongoose = require('mongoose');
 
-// добавить чат, группу 
+// добавить чат, группу
 
 const UserSchema = new mongoose.Schema({
   telegram_id: { type: Number, required: true },
@@ -9,4 +11,13 @@ const UserSchema = new mongoose.Schema({
   lastgrow: { type: Number, required: false, default: 0 },
 })
 
-export default mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
+
+const ChatSchema = new mongoose.Schema({
+  telegram_id: { type: Number, required: true },
+  users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}]
+})
+
+const Chat = mongoose.model("Chat", ChatSchema);
+
+export { User, Chat };

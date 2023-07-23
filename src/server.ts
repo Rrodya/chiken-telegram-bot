@@ -22,6 +22,7 @@ mongoose.connect('mongodb://root:password@127.0.0.1:27017', { })
 const bot = new Telegraf(token);
 
 bot.start((ctx: Context) => {
+  // создание в базе чата
   ctx.reply(messages.welcome);
 });
 
@@ -33,10 +34,19 @@ bot.command("count", async (ctx: Context) => {
   try {
     const id = ctx.message?.from.id;
     const login = ctx.message?.from.username;
+    const chatId = ctx.chat?.id;
+    console.log(ctx.chat);
+    console.log(chatId);
+
+    if (!chatId) {
+      console.log("Chat not fount");
+      return;
+    }
 
     if(id && login) {
-      const user = await UserController.create({id, login});
-
+      // создание пользователей именно в этом чате, добавлять еще в поле айди чата
+      const user = await UserController.create({id, login}, chatId);
+      console.log(user);
       if(user.status == true) {
         let change = getRandomLength();
 
@@ -58,6 +68,19 @@ bot.command("count", async (ctx: Context) => {
     
   } catch (error) {
     console.log("Some error: ", error)
+  }
+})
+
+bot.command("top", async (ctx: Context) => {
+  try {
+    if (ctx.chat?.id) {
+      const some = await UserController.getTop(ctx.chat.id);
+      if (some) {
+        ctx.reply(some);
+      }
+    }
+  } catch (error) {
+    
   }
 })
 

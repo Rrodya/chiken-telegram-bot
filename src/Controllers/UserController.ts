@@ -1,4 +1,4 @@
-import User from "../Models/User";
+import {Chat, User} from "../Models/User";
 
 const TIME = 1000;
 
@@ -10,9 +10,16 @@ interface IUser {
 }
 
 class UserController { 
-  async create(userReq: IUser) {
+  async create(userReq: IUser, chatId: number) {
     try {
       const {id, login} = userReq;
+      const telegram_chat_id = chatId;
+
+      const chat = await this.createChat(telegram_chat_id);
+
+      if(!chat) {
+        console.log("Chat not founrt");
+      }
 
       let candidate = await User.findOne({telegram_id: id});
 
@@ -28,6 +35,9 @@ class UserController {
       if (!candidate) {
         const createdUser = await new User(user);
         await createdUser.save();
+
+        chat.users.push(createdUser._id);
+        await chat.save();
         
         return { status: true, message: "user created"}
       }
@@ -72,7 +82,48 @@ class UserController {
       console.log('Error change length ' + error);
       return { status: false }
     }
-    
+  }
+
+  async createChat(chatId: number) {
+    try {
+      let chat = await Chat.findOne({ telegram_id: chatId})
+
+      if (!chat) {
+        chat = new Chat({
+          telegram_id: chatId,
+          users: [],
+        })
+
+        await chat.save();
+        return chat;
+      }
+      
+      return chat;
+      
+    } catch (error) {
+      console.log("Error with creating chat: ", error);
+      return null;
+    }
+  }
+
+
+  async getTop(chatId: number) {
+    try {
+      console.log(chatId);
+      const chat = await Chat.findOne({telegram_id: chatId}).populate("users");
+      const users = chat.users;
+      
+      users.sort((a:any,  b: any) => b.length - a.length);
+      const topUsers = users.map((user: any, index: number) => `${index + 1}. ${user.login} - ${user.length} см.`).join('\n');
+
+      console.log(topUsers);
+      
+      return topUsers;
+
+
+    } catch (error) {
+      console.log("Error get top: ", error);
+    }
   }
 }
 
