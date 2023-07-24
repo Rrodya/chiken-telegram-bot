@@ -6,6 +6,7 @@ import { Telegraf } from "telegraf";
 import UserController from "./Controllers/UserController"
 import { getRandomLength } from "./module";
 import mongoose from "mongoose";
+import { message } from "telegraf/filters";
 
 dotenv.config();
 
@@ -15,7 +16,9 @@ if(!token) {
   throw new Error("Please insert a token before")
 }
 
-mongoose.connect('mongodb://root:password@127.0.0.1:27017', { })
+console.log(`mongodb://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@127.0.0.1:${process.env.PORT}`);
+
+mongoose.connect(`mongodb://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@127.0.0.1:${process.env.PORT}`, { })
   .then(() => console.log('⚡️ Connected to database!!!'))
   .catch(err => console.error('Error connecting to database', err));
 
@@ -26,7 +29,9 @@ bot.start((ctx: Context) => {
   ctx.reply(messages.welcome);
 });
 
-bot.help((ctx: Context) => {
+
+
+bot.help((ctx: Context) => {    
   ctx.reply(messages.help);
 });
 
@@ -35,9 +40,7 @@ bot.command("count", async (ctx: Context) => {
     const id = ctx.message?.from.id;
     const login = ctx.message?.from.username;
     const chatId = ctx.chat?.id;
-    console.log(ctx.chat);
-    console.log(chatId);
-
+    
     if (!chatId) {
       console.log("Chat not fount");
       return;
@@ -45,12 +48,11 @@ bot.command("count", async (ctx: Context) => {
 
     if(id && login) {
       // создание пользователей именно в этом чате, добавлять еще в поле айди чата
-      const user = await UserController.create({id, login}, chatId);
-      console.log(user);
+      const user = await UserController.create({id: id, login: login}, chatId);
       if(user.status == true) {
         let change = getRandomLength();
 
-        const ans: any = await UserController.updateLength({length: change, id: id});
+        const ans: any = await UserController.updateLength({length: change, id: id}, chatId);
 
         if(ans.status == true) {
           ans.data.change > 0 
@@ -80,8 +82,13 @@ bot.command("top", async (ctx: Context) => {
       }
     }
   } catch (error) {
-    
+    console.log("Error get top " , error);
   }
 })
+
+
+
+
+bot.hears
 
 bot.launch();

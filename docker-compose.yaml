@@ -4,10 +4,10 @@ services:
     image: mongo:latest # use the latest image.
     container_name: mongodb
     environment: # set required env variables to access mongo
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_USERNAME: ${DB_NAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
-      - 27017:27017
+      - ${PORT}:${PORT}
     volumes: # optional to preserve database after container is deleted.
       - ./database-data:/data/db  
-  
+      

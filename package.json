@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
-    "serve": "ts-node-dev --respawn --transpile-only src/server.ts  "
+    "serve": "ts-node-dev --respawn --transpile-only src/server.ts  ",
+    "build": "tsc"
   },
   "compilerOptions": {
     "esModuleInterop": true

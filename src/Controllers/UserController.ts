@@ -15,13 +15,19 @@ class UserController {
       const {id, login} = userReq;
       const telegram_chat_id = chatId;
 
-      const chat = await this.createChat(telegram_chat_id);
+      let chat = await this.createChat(telegram_chat_id);
 
       if(!chat) {
         console.log("Chat not founrt");
       }
 
-      let candidate = await User.findOne({telegram_id: id});
+      chat = await Chat.findOne({telegram_id: chatId}).populate("users");
+
+      let candidate = await User.findOne({telegram_id: id});  
+      const userExistInChat = chat && chat.users.some((u: any) => {
+        return u.telegram_id == id
+      });
+
 
       const time = new Date().getTime(); 
 
@@ -32,7 +38,8 @@ class UserController {
         lastgrow: time,
       } 
 
-      if (!candidate) {
+
+      if (!userExistInChat) {
         const createdUser = await new User(user);
         await createdUser.save();
 
@@ -41,6 +48,18 @@ class UserController {
         
         return { status: true, message: "user created"}
       }
+
+
+      // if (!candidate || !chat.users.includes(candidate._id)) {
+      //   const createdUser = await new User(user);
+      //   await createdUser.save();
+
+      //   chat.users.push(createdUser._id);
+      //   await chat.save();
+        
+      //   return { status: true, message: "user created"}
+      // }
+
 
       if (user.lastgrow - candidate.lastgrow < TIME) {
         return { status: false, message: "time limit"}
@@ -59,23 +78,30 @@ class UserController {
     }
   }
 
-  async updateLength(info: {length: number, id: number}) {
+  async updateLength(info: {length: number, id: number}, chatId: number) {
     try {
       const { length, id } = info;
-      const user = await User.findOne({telegram_id: id})
-      console.log(user);
-      let change = user.length;
+      const chat = await Chat.findOne({telegram_id: chatId}).populate("users");
+      const user = chat.users.find((u: any) => u.telegram_id === id);
+      const updateUser = {
+        telegram_id: user.telegram_id,
+        login: user.login,
+        length: user.length,
+        lastgrow: user.lastgrow
+      }
+      
+      let change = updateUser.length;
       change = change + length;
 
       if (change > 0) {
-        user['length'] = change;
+        updateUser['length'] = change;
       } else {
-        user['length'] = 0;
+        updateUser['length'] = 0;
       }
 
-      await User.updateOne({telegram_id: id}, user);
+      await User.updateOne({_id: user._id}, updateUser);
       return { status: true, message: "success", data: {
-        currentLength: user.length,
+        currentLength: updateUser.length,
         change: length
       }}  
     } catch (error) {
@@ -109,18 +135,13 @@ class UserController {
 
   async getTop(chatId: number) {
     try {
-      console.log(chatId);
       const chat = await Chat.findOne({telegram_id: chatId}).populate("users");
       const users = chat.users;
       
       users.sort((a:any,  b: any) => b.length - a.length);
       const topUsers = users.map((user: any, index: number) => `${index + 1}. ${user.login} - ${user.length} см.`).join('\n');
 
-      console.log(topUsers);
-      
       return topUsers;
-
-
     } catch (error) {
       console.log("Error get top: ", error);
     }
