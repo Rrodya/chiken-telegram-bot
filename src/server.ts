@@ -79,6 +79,7 @@ bot.command("topObrez", async (ctx: Context) => {
   try {
     if (ctx.chat?.id) {
       const users = await UserController.getTopObrez(ctx.chat.id);
+      
       if (users && users.length > 0) {
         ctx.reply("top score евреев: \n" + users);
       }
@@ -103,13 +104,8 @@ bot.command("top", async (ctx: Context) => {
 
 
 
-bot.on("text", async (ctx: Context) => {
-  console.log(ctx.message?.text);
-  if (ctx.message?.text.split(" ")[0] !== "/обрезать") {
-    console.log("not");
-    return;
-  }
-  const userName1 = ctx.message?.text.split(" ")[1];
+bot.command("obrez", async (ctx: any) => {
+  const userName1 = ctx.message?.text?.split(" ")[1];
   const user2Id = ctx.from?.id;
   const spiztedLength = Number(ctx.message?.text.split(" ")[2])
   const chatId = ctx.chat?.id;
