@@ -8,7 +8,7 @@ import { getRandomLength } from "./module";
 import mongoose from "mongoose";
 import { message } from "telegraf/filters";
 
-dotenv.config();
+dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
 
 const token = process.env.TOKEN;
 
@@ -35,7 +35,7 @@ bot.help((ctx: Context) => {
   ctx.reply(messages.help);
 });
 
-bot.command("count", async (ctx: Context) => {
+bot.command("penis", async (ctx: Context) => {
   try {
     const id = ctx.message?.from.id;
     const login = ctx.message?.from.username;
@@ -56,11 +56,11 @@ bot.command("count", async (ctx: Context) => {
 
         if(ans.status == true) {
           ans.data.change > 0 
-            ? ctx.reply(`Вырос на ${ans.data.change} см. Теперь ${ans.data.currentLength} см`) 
-            : ctx.reply(`Уменьшился на ${Math.abs(ans.data.change)} см. Теперь ${ans.data.currentLength} см`) 
+            ? ctx.reply(`Харош. хуй вырос на ${ans.data.change} см. Теперь ${ans.data.currentLength} см`) 
+            : ctx.reply(`Ныа лох. хуй уменьшился на ${Math.abs(ans.data.change)} см. Теперь ${ans.data.currentLength} см`) 
         }
       } else if(user.status == false && user.message == "time limit") {
-        ctx.reply("Ты уже играл")
+        ctx.reply("А все пидар, дрочить больше нельзя, жди " + user.time)
       } else if(user.status == false && user.message == "user exist") {
         ctx.reply("Сорян какая-то ошибка с тобой хз. лох ты какой-то")
       }

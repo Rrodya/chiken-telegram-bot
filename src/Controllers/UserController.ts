@@ -1,12 +1,24 @@
 import {Chat, User} from "../Models/User";
 
-const TIME = 1000;
+const TIME = 43200000;
 
 interface IUser {
   id: number;
   login: string;
   length?: number;
   lastgrow?: number;
+}
+
+function msToTime(duration: number) {
+    let seconds = Math.floor((duration / 1000) % 60),
+        minutes = Math.floor((duration / (1000 * 60)) % 60),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+    let Strhours = (hours < 10) ? "0" + hours : hours;
+    let Strminutes = (minutes < 10) ? "0" + minutes : minutes;
+    let Strseconds = (seconds < 10) ? "0" + seconds : seconds;
+
+    return Strhours + ":" + Strminutes + ":" + Strseconds;
 }
 
 class UserController { 
@@ -62,7 +74,7 @@ class UserController {
 
 
       if (user.lastgrow - candidate.lastgrow < TIME) {
-        return { status: false, message: "time limit"}
+        return { status: false, message: "time limit", time: msToTime(TIME - (user.lastgrow - candidate.lastgrow))}
       }
 
       user.length = candidate.length
