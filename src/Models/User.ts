@@ -9,12 +9,13 @@ const UserSchema = new mongoose.Schema({
   login: { type: String, required: true },
   length: { type: Number, required: true },
   lastgrow: { type: Number, required: false, default: 0 },
+  obrezWin: { type: Number, required: false, default: 0 },
 })
 
 const User = mongoose.model("User", UserSchema);
 
 const ChatSchema = new mongoose.Schema({
-  telegram_id: { type: Number, required: true },
+  telegram_id: { type: Number, required: true },  
   users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}]
 })
 

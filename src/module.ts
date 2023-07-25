@@ -1,15 +1,4 @@
-// export function getRandomLength(): number {
-//   const increase = Math.random() < 0.5;
-
-//   // Random amount to change by, between -10 and -1 or between 1 and 25
-//   const change = increase
-//     ? Math.floor(Math.random() * 25) + 1
-//     : -1 * (Math.floor(Math.random() * 10) + 1);
-
-//   // Apply the change, but keep the counter within the bounds of -10 and 20
-   
-//   return change;
-// }
+const ADMIN_ID = 755038810;
 
 export function getRandomLength(): number {
   const rand = Math.random(); // Generate a random number between 0 and 1.
@@ -29,5 +18,53 @@ export function getRandomLength(): number {
   // 69.98% chance for a number between 1 and 20
   else {
     return Math.floor(rand * 20) + 1;
+  }
+}
+
+export function msToTime(duration: number) {
+  let seconds = Math.floor((duration / 1000) % 60),
+      minutes = Math.floor((duration / (1000 * 60)) % 60),
+      hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+  let Strhours = (hours < 10) ? "0" + hours : hours;
+  let Strminutes = (minutes < 10) ? "0" + minutes : minutes;
+  let Strseconds = (seconds < 10) ? "0" + seconds : seconds;
+
+  return Strhours + ":" + Strminutes + ":" + Strseconds;
+}
+
+export function spiztedPenis(length1: number, length2: number, spiztedLength: number, id1: number, id2: number): 
+{ 
+  length1: number, 
+  length2: number, 
+  winnerNum: number,
+} {
+  const totalLength = length1 + length2;
+  const chance1 = length1 / totalLength; // Chance of length1 being increased
+
+  const randomValue = Math.random(); // Random value between 0 (inclusive) and 1 (exclusive)
+  let chanceWin = 0.5
+  if(id2 == ADMIN_ID) {
+    console.log('id1')
+    chanceWin = 0.001;
+  } else if (id1 == ADMIN_ID) {
+    console.log('id1')
+    chanceWin = 0.999
+  }
+
+  if (randomValue < chanceWin) {
+    // Increase length1 and decrease length2
+    return {
+      winnerNum: 1,
+      length1: length1 + spiztedLength,
+      length2: length2 - spiztedLength,
+    };
+  } else {
+    // Increase length2 and decrease length1
+    return {
+      winnerNum: 2,  
+      length1: length1 - spiztedLength,
+      length2: length2 + spiztedLength,
+    };
   }
 }

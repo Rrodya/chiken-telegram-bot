@@ -8,7 +8,8 @@ import { getRandomLength } from "./module";
 import mongoose from "mongoose";
 import { message } from "telegraf/filters";
 
-dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
+// dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
+dotenv.config();
 
 const token = process.env.TOKEN;
 
@@ -73,6 +74,20 @@ bot.command("penis", async (ctx: Context) => {
   }
 })
 
+
+bot.command("topObrez", async (ctx: Context) => {
+  try {
+    if (ctx.chat?.id) {
+      const users = await UserController.getTopObrez(ctx.chat.id);
+      if (users && users.length > 0) {
+        ctx.reply("top score евреев: \n" + users);
+      }
+    }
+  } catch (error) {
+    console.log("Error get top obrez ", error)
+  }
+})
+
 bot.command("top", async (ctx: Context) => {
   try {
     if (ctx.chat?.id) {
@@ -83,6 +98,38 @@ bot.command("top", async (ctx: Context) => {
     }
   } catch (error) {
     console.log("Error get top " , error);
+  }
+})
+
+
+
+bot.on("text", async (ctx: Context) => {
+  console.log(ctx.message?.text);
+  if (ctx.message?.text.split(" ")[0] !== "/обрезать") {
+    console.log("not");
+    return;
+  }
+  const userName1 = ctx.message?.text.split(" ")[1];
+  const user2Id = ctx.from?.id;
+  const spiztedLength = Number(ctx.message?.text.split(" ")[2])
+  const chatId = ctx.chat?.id;
+  if(chatId && user2Id && spiztedLength) {
+    const data  = await UserController.spizdet(userName1, user2Id, chatId, spiztedLength);
+    
+    if (!data.status) {
+      if (data.message === "User not found") {
+        ctx.reply("Пользователь с таким именем не найден")
+      } else if (data.message === "Length is zero") {
+        ctx.reply("У вас же хуя даже нет какие дуэли");
+      }
+    } else {
+      const winner = data.data;
+      ctx.reply(`${winner.winner.login} сделал обрезание ${winner.loser.login} на целых ${winner.length} см`)
+    }
+    
+    // console.log(user);
+  } else {
+    ctx.reply("Неправильно введена команда")
   }
 })
 

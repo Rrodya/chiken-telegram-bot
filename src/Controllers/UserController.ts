@@ -1,25 +1,17 @@
 import {Chat, User} from "../Models/User";
+import { msToTime, spiztedPenis } from "../module";
 
-const TIME = 43200000;
+const TIME = 2000;
 
 interface IUser {
   id: number;
   login: string;
   length?: number;
   lastgrow?: number;
+  obrezWin?: number;
 }
 
-function msToTime(duration: number) {
-    let seconds = Math.floor((duration / 1000) % 60),
-        minutes = Math.floor((duration / (1000 * 60)) % 60),
-        hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
 
-    let Strhours = (hours < 10) ? "0" + hours : hours;
-    let Strminutes = (minutes < 10) ? "0" + minutes : minutes;
-    let Strseconds = (seconds < 10) ? "0" + seconds : seconds;
-
-    return Strhours + ":" + Strminutes + ":" + Strseconds;
-}
 
 class UserController { 
   async create(userReq: IUser, chatId: number) {
@@ -48,6 +40,7 @@ class UserController {
         login: login,
         length: 0,
         lastgrow: time,
+        obrezWin: 0,
       } 
 
 
@@ -77,7 +70,8 @@ class UserController {
         return { status: false, message: "time limit", time: msToTime(TIME - (user.lastgrow - candidate.lastgrow))}
       }
 
-      user.length = candidate.length
+      user.length = candidate.length;
+      user.obrezWin = candidate.obrezWin;
 
       candidate = await User.findOneAndUpdate({telegram_id: id}, user);
       candidate.save();
@@ -99,7 +93,8 @@ class UserController {
         telegram_id: user.telegram_id,
         login: user.login,
         length: user.length,
-        lastgrow: user.lastgrow
+        lastgrow: user.lastgrow,
+        obrezWin: user.obrezWin || 0,
       }
       
       let change = updateUser.length;
@@ -156,6 +151,100 @@ class UserController {
       return topUsers;
     } catch (error) {
       console.log("Error get top: ", error);
+    }
+  }
+
+  async spizdet(username1: string, user2id: number, chatId: number, spiztedLength: number) {
+    try {
+      const chat = await Chat.findOne({telegram_id: chatId}).populate("users");
+      const users = chat.users;
+      const foundUser = users.find((user: any) => user.login === username1);      
+      const foundUser2 = users.find((user: any) => user.telegram_id === user2id);
+      const winner: any = {
+        winner: {},
+        loser: {},
+        length: 0,
+      }
+      spiztedLength = Math.round(spiztedLength);
+
+      if (!foundUser || !foundUser2) {
+        return { status: false, message: "User not found"}
+      }
+
+      const updateFoundUser1 = {
+        telegram_id: foundUser.telegram_id,
+        login: foundUser.login,
+        length: foundUser.length,
+        lastgrow: foundUser.lastgrow,
+        obrezWin: foundUser.obrezWin,
+      }
+
+      const updateFoundUser2 = {
+        telegram_id: foundUser2.telegram_id,
+        login: foundUser2.login,
+        length: foundUser2.length,
+        lastgrow: foundUser2.lastgrow,
+        obrezWin: foundUser2.obrezWin,
+      }
+
+      if(updateFoundUser1.length == 0 || updateFoundUser2.length == 0) {
+        return { status: false, message: "Length is zero" }
+      }
+
+      if (spiztedLength > updateFoundUser2.length) {
+        spiztedLength = updateFoundUser2.length;
+      }
+
+      if (spiztedLength > updateFoundUser1.length || spiztedLength > updateFoundUser2.length) {
+        if (updateFoundUser1.length > updateFoundUser2.length) {
+          spiztedLength = updateFoundUser2.length
+        } else {
+          spiztedLength = updateFoundUser1.length
+        }
+      }
+
+      const { length1, length2, winnerNum } = spiztedPenis(updateFoundUser1.length, updateFoundUser2.length, spiztedLength, foundUser.telegram_id, foundUser2.telegram_id);
+
+      updateFoundUser1.length = length1;
+      updateFoundUser2.length = length2;
+
+      if (updateFoundUser1.length > foundUser.length) {
+        console.log('first win')
+        updateFoundUser1.obrezWin = updateFoundUser1.obrezWin + 1;
+      } else {
+        console.log('second win')
+        updateFoundUser2.obrezWin = updateFoundUser2.obrezWin + 1;
+      }
+
+      const newUser1 = await User.findOneAndUpdate({_id: foundUser._id}, updateFoundUser1);
+      const newUser2 = await User.findOneAndUpdate({_id: foundUser2._id}, updateFoundUser2);
+      if (winnerNum == 1) {
+        winner.winner = newUser1;
+        winner.loser = newUser2;  
+      } else {
+        winner.winner = newUser2;
+        winner.loser = newUser1;
+      }
+      winner.length = spiztedLength;
+
+      return { status: true, message: "ok", data: winner};
+    } catch (error) {
+      console.log("Error, cannot found user: " + error);
+      return { status: false, message: "in error"}
+    }
+  }
+
+  async getTopObrez(chatId: number) {
+    try {
+      const chat = await Chat.findOne({telegram_id: chatId}).populate("users");
+      const users = chat.users;
+      
+      users.sort((a:any,  b: any) => b.obrezWin - a.obrezWin);
+      const topUsers = users.map((user: any, index: number) => `${index + 1}. ${user.login}: ${user.obrezWin} обрезаний`).join('\n');
+      return topUsers;
+      return topUsers;
+    } catch (error) {
+      console.log("Error get top obrez: ", error);
     }
   }
 }
