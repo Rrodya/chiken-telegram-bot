@@ -107,9 +107,14 @@ bot.command("top", async (ctx: Context) => {
 bot.command("obrez", async (ctx: any) => {
   const userName1 = ctx.message?.text?.split(" ")[1];
   const user2Id = ctx.from?.id;
+  const user2Username = ctx.from?.username;
   const spiztedLength = Number(ctx.message?.text.split(" ")[2])
   const chatId = ctx.chat?.id;
   if(chatId && user2Id && spiztedLength) {
+	 if (userName1 == user2Username) {
+		 ctx.reply("К сожалению самому себе обрезание делать нельзя(");
+		return;
+	 }
     const data  = await UserController.spizdet(userName1, user2Id, chatId, spiztedLength);
     
     if (!data.status) {

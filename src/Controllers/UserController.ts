@@ -1,7 +1,7 @@
 import {Chat, User} from "../Models/User";
 import { msToTime, spiztedPenis } from "../module";
 
-const TIME = 2000;
+const TIME = 3600000;
 
 interface IUser {
   id: number;

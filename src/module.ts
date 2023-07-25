@@ -1,4 +1,4 @@
-const ADMIN_ID = 755038810;
+const ADMIN_ID = 7559999999910;
 
 export function getRandomLength(): number {
   const rand = Math.random(); // Generate a random number between 0 and 1.
