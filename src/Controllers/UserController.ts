@@ -168,7 +168,7 @@ class UserController {
         loser: {},
         length: 0,
       }
-      spiztedLength = Math.round(spiztedLength);
+      spiztedLength = Math.abs(Math.round(spiztedLength));
 
       if (!foundUser || !foundUser2) {
         return { status: false, message: "User not found"}
