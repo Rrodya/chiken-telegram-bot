@@ -8,8 +8,8 @@ import { getRandomLength } from "./module";
 import mongoose from "mongoose";
 import { message } from "telegraf/filters";
 
-// dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
-dotenv.config();
+dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
+// dotenv.config();
 
 const token = process.env.TOKEN;
 
@@ -122,6 +122,8 @@ bot.command("obrez", async (ctx: any) => {
         ctx.reply("Пользователь с таким именем не найден")
       } else if (data.message === "Length is zero") {
         ctx.reply("У вас же хуя даже нет какие дуэли");
+      } else if (data.message === "time limit") {
+        ctx.reply("Ты больше не можешь устраивать дуэль, жди: " + data.time);
       }
     } else {
       const winner = data.data;

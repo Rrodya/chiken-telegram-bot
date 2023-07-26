@@ -2,6 +2,7 @@ import {Chat, User} from "../Models/User";
 import { msToTime, spiztedPenis } from "../module";
 
 const TIME = 3600000;
+const OBREZ_TIME = 300000;
 
 interface IUser {
   id: number;
@@ -9,6 +10,7 @@ interface IUser {
   length?: number;
   lastgrow?: number;
   obrezWin?: number;
+  lastObrez? : number;
 }
 
 
@@ -41,6 +43,7 @@ class UserController {
         length: 0,
         lastgrow: time,
         obrezWin: 0,
+        lastObrez: 0,
       } 
 
 
@@ -95,6 +98,7 @@ class UserController {
         length: user.length,
         lastgrow: user.lastgrow,
         obrezWin: user.obrezWin || 0,
+        lastObrez: user.lastObrez || 0,
       }
       
       let change = updateUser.length;
@@ -160,6 +164,7 @@ class UserController {
       const users = chat.users;
       const foundUser = users.find((user: any) => user.login === username1);      
       const foundUser2 = users.find((user: any) => user.telegram_id === user2id);
+      const time = new Date().getTime();
       const winner: any = {
         winner: {},
         loser: {},
@@ -177,6 +182,7 @@ class UserController {
         length: foundUser.length,
         lastgrow: foundUser.lastgrow,
         obrezWin: foundUser.obrezWin,
+        lastObrez: foundUser.lastObrez
       }
 
       const updateFoundUser2 = {
@@ -185,6 +191,11 @@ class UserController {
         length: foundUser2.length,
         lastgrow: foundUser2.lastgrow,
         obrezWin: foundUser2.obrezWin,
+        lastObrez: time,
+      }
+
+      if (updateFoundUser2.lastObrez - foundUser2.lastObrez < OBREZ_TIME) {
+        return { status: false, message: "time limit", time: msToTime(OBREZ_TIME - (updateFoundUser2.lastObrez - foundUser2.lastObrez))}
       }
 
       if(updateFoundUser1.length == 0 || updateFoundUser2.length == 0) {

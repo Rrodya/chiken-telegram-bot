@@ -9,7 +9,8 @@ const UserSchema = new mongoose.Schema({
   login: { type: String, required: true },
   length: { type: Number, required: true },
   lastgrow: { type: Number, required: false, default: 0 },
-  obrezWin: { type: Number, required: false, default: 0 },
+  obrezWin: { type: Number, required: false, default: 0 },  
+  lastObrez: { type: Number, required: false, default: 0 },
 })
 
 const User = mongoose.model("User", UserSchema);
