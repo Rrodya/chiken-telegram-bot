@@ -12,6 +12,7 @@ dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
 // dotenv.config();
 
 const token = process.env.TOKEN;
+const admin = 755038810;
 
 if(!token) {
   throw new Error("Please insert a token before")
@@ -136,9 +137,32 @@ bot.command("obrez", async (ctx: any) => {
   }
 })
 
+bot.command("set", async (ctx: any) => {
+  const username1 = ctx.message?.text?.split(" ")[1];
+  const user2Id = ctx.from?.id;
+  const user2Username = ctx.from?.username;
+  const chatId = ctx.chat?.id
+  const length = Number(ctx.message?.text.split(" ")[2])
+
+  if(user2Id !== admin) {
+    ctx.reply("закрыто епта");
+    return;
+  }
+
+  const data = await UserController.setLength(chatId, username1, length);
+  console.log(data);
+  if(data) {
+    if(!data.status) {
+      if (data?.message === "User not found") {
+        ctx.reply("Такой пользователь не найден");
+        return;
+      }
+    }
+  }
+
+  ctx.reply(`хуй пользователя ${username1} изменен на ${length}`);
+});
 
 
-
-bot.hears
 
 bot.launch();

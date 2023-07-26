@@ -13,8 +13,6 @@ interface IUser {
   lastObrez? : number;
 }
 
-
-
 class UserController { 
   async create(userReq: IUser, chatId: number) {
     try {
@@ -195,7 +193,7 @@ class UserController {
       }
 
       if (updateFoundUser2.lastObrez - foundUser2.lastObrez < OBREZ_TIME) {
-        return { status: false, message: "time limit", time: msToTime(OBREZ_TIME - (updateFoundUser2.lastObrez - foundUser2.lastObrez))}
+        return { status: false, message: "time limit", time: msToTime(OBREZ_TIME - (updateFoundUser2.lastObrez - foundUser2.lastObrezgi))}
       }
 
       if(updateFoundUser1.length == 0 || updateFoundUser2.length == 0) {
@@ -253,9 +251,35 @@ class UserController {
       users.sort((a:any,  b: any) => b.obrezWin - a.obrezWin);
       const topUsers = users.map((user: any, index: number) => `${index + 1}. ${user.login}: ${user.obrezWin} обрезаний`).join('\n');
       return topUsers;
-      return topUsers;
     } catch (error) {
       console.log("Error get top obrez: ", error);
+    }
+  }
+
+  async setLength (chatId: number, username: string, length: number) {
+    try {
+      const chat = await Chat.findOne({telegram_id: chatId}).populate("users");
+      const user = chat.users.find((user: any) => user.login == username);
+      if (!user) {
+        return { status: false, message: "User not found"}
+      }
+      const newUser = {
+        telegram_id: user.telegram_id,
+        login: user.login,
+        length: length,
+        lastgrow: user.lastgrow,
+        obrezWin: user.obrezWin,
+        lastObrez: user.lastObrez
+      }
+
+
+      user.length = length;
+      await user.save();
+
+      // await User.updateOne({_id: user._id}, newUser);
+      return { status: true, message: "User updated"}
+    } catch (error) {
+      console.log("Error set length: ", error);
     }
   }
 }
