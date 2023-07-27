@@ -193,7 +193,7 @@ class UserController {
       }
 
       if (updateFoundUser2.lastObrez - foundUser2.lastObrez < OBREZ_TIME) {
-        return { status: false, message: "time limit", time: msToTime(OBREZ_TIME - (updateFoundUser2.lastObrez - foundUser2.lastObrezgi))}
+        return { status: false, message: "time limit", time: msToTime(OBREZ_TIME - (updateFoundUser2.lastObrez - foundUser2.lastObrez))}
       }
 
       if(updateFoundUser1.length == 0 || updateFoundUser2.length == 0) {

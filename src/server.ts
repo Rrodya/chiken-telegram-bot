@@ -8,9 +8,11 @@ import { getRandomLength } from "./module";
 import mongoose from "mongoose";
 import { message } from "telegraf/filters";
 
+// добавление доступ к переменным
 dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
 // dotenv.config();
 
+// токен бота и айди админа в телеграме
 const token = process.env.TOKEN;
 const admin = 755038810;
 
@@ -18,27 +20,30 @@ if(!token) {
   throw new Error("Please insert a token before")
 }
 
-console.log(`mongodb://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@127.0.0.1:${process.env.PORT}`);
-
+// подключение к базе
 mongoose.connect(`mongodb://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@127.0.0.1:${process.env.PORT}`, { })
   .then(() => console.log('⚡️ Connected to database!!!'))
   .catch(err => console.error('Error connecting to database', err));
 
+// создание бота
 const bot = new Telegraf(token);
 
+// команда запуска бота /start
 bot.start((ctx: Context) => {
-  // создание в базе чата
   ctx.reply(messages.welcome);
 });
 
 
-
+//help
 bot.help((ctx: Context) => {    
   ctx.reply(messages.help);
 });
 
+
+// penis команда для увеленчения длины
 bot.command("penis", async (ctx: Context) => {
   try {
+    // взять основные данные о пользователе кто отправил команду(айди, логин) а так же айди чата
     const id = ctx.message?.from.id;
     const login = ctx.message?.from.username;
     const chatId = ctx.chat?.id;
@@ -49,19 +54,23 @@ bot.command("penis", async (ctx: Context) => {
     }
 
     if(id && login) {
-      // создание пользователей именно в этом чате, добавлять еще в поле айди чата
+      
+      //создание пользователя в чате, а так же добавление чата в бд(если пользователь и чат существует ничего не изменится)
       const user = await UserController.create({id: id, login: login}, chatId);
       if(user.status == true) {
+        // вызов модуля который вернет с 50% вероятностью отрицательное и положительное рандомное число от -1 до -15 и от 1 до 25
         let change = getRandomLength();
-
+        // контроллер который обновит длину в базе данных для пользователя с id на длину length в чате chatId
         const ans: any = await UserController.updateLength({length: change, id: id}, chatId);
 
+        // вывод соотвествующего сообщения относительно того уменшилась или увеличилась длинна 
         if(ans.status == true) {
           ans.data.change > 0 
             ? ctx.reply(`Харош. хуй вырос на ${ans.data.change} см. Теперь ${ans.data.currentLength} см`) 
             : ctx.reply(`Ныа лох. хуй уменьшился на ${Math.abs(ans.data.change)} см. Теперь ${ans.data.currentLength} см`) 
         }
       } else if(user.status == false && user.message == "time limit") {
+        // возвращается в том случае если пользователь повторно вызвал команду меньше чем через час
         ctx.reply("А все пидар, дрочить больше нельзя, жди " + user.time)
       } else if(user.status == false && user.message == "user exist") {
         ctx.reply("Сорян какая-то ошибка с тобой хз. лох ты какой-то")
@@ -76,6 +85,8 @@ bot.command("penis", async (ctx: Context) => {
 })
 
 
+
+// получить топ людей которые больше всех выиграли (забрали у дргих людей длину) с помощью команды /obrez
 bot.command("topObrez", async (ctx: Context) => {
   try {
     if (ctx.chat?.id) {
@@ -90,6 +101,7 @@ bot.command("topObrez", async (ctx: Context) => {
   }
 })
 
+// команда возвращает топ пользователей в чате по длине
 bot.command("top", async (ctx: Context) => {
   try {
     if (ctx.chat?.id) {
@@ -104,7 +116,9 @@ bot.command("top", async (ctx: Context) => {
 })
 
 
-
+// команда которая принимает в себя /obrez логин число. с 50% вероятностью либо заберет у вызвающего команду
+// длину которую он указал и присвоит ее тому кого кому пренедлежит логин, либо присвоим вызывающему длину и 
+// заберет ее у того кому пренадлежит логин
 bot.command("obrez", async (ctx: any) => {
   const userName1 = ctx.message?.text?.split(" ")[1];
   const user2Id = ctx.from?.id;
@@ -137,6 +151,7 @@ bot.command("obrez", async (ctx: any) => {
   }
 })
 
+// команда для админа которая в ручню через /set login number может изменить в бд длину любого пользователя
 bot.command("set", async (ctx: any) => {
   const username1 = ctx.message?.text?.split(" ")[1];
   const user2Id = ctx.from?.id;
