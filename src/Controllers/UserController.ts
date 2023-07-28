@@ -1,8 +1,11 @@
+import { log } from "console";
 import {Chat, User} from "../Models/User";
 import { msToTime, spiztedPenis } from "../module";
 
 const TIME = 3600000;
+// const TIME = 1000;
 const OBREZ_TIME = 300000;
+// const OBREZ_TIME = 1000;
 
 interface IUser {
   id: number;
@@ -42,6 +45,7 @@ class UserController {
         lastgrow: time,
         obrezWin: 0,
         lastObrez: 0,
+        lengthObrez: 0,
       } 
 
 
@@ -97,6 +101,7 @@ class UserController {
         lastgrow: user.lastgrow,
         obrezWin: user.obrezWin || 0,
         lastObrez: user.lastObrez || 0,
+        lengthObrez: user.lengthObrez || 0,
       }
       
       let change = updateUser.length;
@@ -180,7 +185,8 @@ class UserController {
         length: foundUser.length,
         lastgrow: foundUser.lastgrow,
         obrezWin: foundUser.obrezWin,
-        lastObrez: foundUser.lastObrez
+        lastObrez: foundUser.lastObrez,
+        lengthObrez: foundUser.lengthObrez,
       }
 
       const updateFoundUser2 = {
@@ -190,6 +196,7 @@ class UserController {
         lastgrow: foundUser2.lastgrow,
         obrezWin: foundUser2.obrezWin,
         lastObrez: time,
+        lengthObrez: foundUser2.lengthObrez,
       }
 
       if (updateFoundUser2.lastObrez - foundUser2.lastObrez < OBREZ_TIME) {
@@ -218,11 +225,12 @@ class UserController {
       updateFoundUser2.length = length2;
 
       if (updateFoundUser1.length > foundUser.length) {
-        console.log('first win')
         updateFoundUser1.obrezWin = updateFoundUser1.obrezWin + 1;
+        updateFoundUser1.lengthObrez = updateFoundUser1.lengthObrez + spiztedLength
       } else {
-        console.log('second win')
         updateFoundUser2.obrezWin = updateFoundUser2.obrezWin + 1;
+        updateFoundUser2.lengthObrez = updateFoundUser2.lengthObrez + spiztedLength
+
       }
 
       const newUser1 = await User.findOneAndUpdate({_id: foundUser._id}, updateFoundUser1);
@@ -263,15 +271,6 @@ class UserController {
       if (!user) {
         return { status: false, message: "User not found"}
       }
-      const newUser = {
-        telegram_id: user.telegram_id,
-        login: user.login,
-        length: length,
-        lastgrow: user.lastgrow,
-        obrezWin: user.obrezWin,
-        lastObrez: user.lastObrez
-      }
-
 
       user.length = length;
       await user.save();
@@ -280,6 +279,20 @@ class UserController {
       return { status: true, message: "User updated"}
     } catch (error) {
       console.log("Error set length: ", error);
+    }
+  }
+
+  async getTopLengthObrez (chatId: string) {
+    try {
+      const chat = await Chat.findOne({telegram_id: chatId}).populate("users");
+      const users = chat.users;
+      
+      users.sort((a:any,  b: any) => b.lengthObrez - a.lengthObrez);
+      const topUsers = users.map((user: any, index: number) => `${index + 1}. ${user.login} - ${user.obrezWin} выиграл, ${user.lengthObrez} см. обрезал`).join('\n');
+
+      return topUsers;
+    } catch (error) {
+      console.log("Error getTopLengthObrez: ", error);
     }
   }
 }

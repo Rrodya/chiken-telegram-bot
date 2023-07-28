@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
   lastgrow: { type: Number, required: false, default: 0 },
   obrezWin: { type: Number, required: false, default: 0 },  
   lastObrez: { type: Number, required: false, default: 0 },
+  lengthObrez: { type: Number, required: false, default: 0}
 })
 
 const User = mongoose.model("User", UserSchema);

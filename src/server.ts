@@ -90,7 +90,7 @@ bot.command("penis", async (ctx: Context) => {
 bot.command("topObrez", async (ctx: Context) => {
   try {
     if (ctx.chat?.id) {
-      const users = await UserController.getTopObrez(ctx.chat.id);
+      const users = await UserController.getTopLengthObrez(ctx.chat.id);
       
       if (users && users.length > 0) {
         ctx.reply("top score евреев: \n" + users);
@@ -177,7 +177,5 @@ bot.command("set", async (ctx: any) => {
 
   ctx.reply(`хуй пользователя ${username1} изменен на ${length}`);
 });
-
-
 
 bot.launch();
