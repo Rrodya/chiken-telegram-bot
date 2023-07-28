@@ -282,7 +282,7 @@ class UserController {
     }
   }
 
-  async getTopLengthObrez (chatId: string) {
+  async getTopLengthObrez (chatId: number) {
     try {
       const chat = await Chat.findOne({telegram_id: chatId}).populate("users");
       const users = chat.users;
