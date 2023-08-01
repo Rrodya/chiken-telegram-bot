@@ -3,19 +3,24 @@ const ADMIN_ID = 7559999999910;
 export function getRandomLength(): number {
   const rand = Math.random(); // Generate a random number between 0 and 1.
 
-  // 0.01% chance for -100
-  if (rand < 0.0001) {
-    return -100;
+  // 1% chance for -100
+  if (rand < 0.01) {
+    return -200;
   }
-  // 0.01% chance for 200
-  else if (rand < 0.0002) {
-    return 200;
+  // 1% chance for 200
+  else if (rand < 0.1) {
+    return 400;
+  }
+  
+  else if (rand < 0.0005) {
+    return 10000 
   }
   // 30% chance for a number between -1 and -15
   else if (rand < 0.3) {
     return Math.floor(rand * 15) - 15;
   }
-  // 69.98% chance for a number between 1 and 20
+  
+  // 69.99% chance for a number between 1 and 20
   else {
     return Math.floor(rand * 20) + 1;
   }

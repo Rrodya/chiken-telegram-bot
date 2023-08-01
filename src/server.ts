@@ -1,16 +1,14 @@
 const dotenv = require("dotenv");
 
 import messages from "./senc"
-import { Context } from "telegraf";
-import { Telegraf } from "telegraf";
+import { Context, Markup, Telegraf, session, Scenes, Composer } from "telegraf";
 import UserController from "./Controllers/UserController"
 import { getRandomLength } from "./module";
 import mongoose from "mongoose";
-import { message } from "telegraf/filters";
 
 // добавление доступ к переменным
-dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
-// dotenv.config();
+// dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
+dotenv.config();
 
 // токен бота и айди админа в телеграме
 const token = process.env.TOKEN;
@@ -25,6 +23,16 @@ mongoose.connect(`mongodb://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@12
   .then(() => console.log('⚡️ Connected to database!!!'))
   .catch(err => console.error('Error connecting to database', err));
 
+
+// const keyMark = Markup.inlineKeyboard([
+//   Markup.button.url("❤️", "http://telegraf.js.org"),
+//   Markup.button.callback("➡️ Next", "next"),
+// ]),
+
+const mainMenu = Markup.keyboard([
+  ['/penis', '/top'],
+  ['/topObrez']
+]).resize();
 // создание бота
 const bot = new Telegraf(token);
 
@@ -33,11 +41,17 @@ bot.start((ctx: Context) => {
   ctx.reply(messages.welcome);
 });
 
+bot.command('menu', (ctx) => {
+  ctx.reply('Here is the menu:', mainMenu);
+});
+
 
 //help
 bot.help((ctx: Context) => {    
   ctx.reply(messages.help);
 });
+
+
 
 
 // penis команда для увеленчения длины
@@ -65,6 +79,10 @@ bot.command("penis", async (ctx: Context) => {
 
         // вывод соотвествующего сообщения относительно того уменшилась или увеличилась длинна 
         if(ans.status == true) {
+          if(ans.data.chande > 100) {
+            ctx.reply("ЕЕЕЕЕЕБААААТь чел ты нахуй джекпот выбил, шанс того что сейчас случилось: 0.005%. Везучий скатына, конгратилейшонс")
+            return;
+          }
           ans.data.change > 0 
             ? ctx.reply(`Харош. хуй вырос на ${ans.data.change} см. Теперь ${ans.data.currentLength} см`) 
             : ctx.reply(`Ныа лох. хуй уменьшился на ${Math.abs(ans.data.change)} см. Теперь ${ans.data.currentLength} см`) 

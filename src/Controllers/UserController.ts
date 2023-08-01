@@ -2,10 +2,11 @@ import { log } from "console";
 import {Chat, User} from "../Models/User";
 import { msToTime, spiztedPenis } from "../module";
 
-const TIME = 3600000;
-// const TIME = 1000;
-const OBREZ_TIME = 300000;
-// const OBREZ_TIME = 1000;
+// const TIME = 3600000;
+const TIME = 1000;
+// const OBREZ_TIME = 300000;
+const OBREZ_TIME = 1000;
+const PROTECT_TIME = 10000;
 
 interface IUser {
   id: number;
@@ -14,6 +15,7 @@ interface IUser {
   lastgrow?: number;
   obrezWin?: number;
   lastObrez? : number;
+  lengthObrez: number;
 }
 
 class UserController { 
@@ -173,6 +175,7 @@ class UserController {
         loser: {},
         length: 0,
       }
+
       spiztedLength = Math.abs(Math.round(spiztedLength));
 
       if (!foundUser || !foundUser2) {
@@ -207,6 +210,14 @@ class UserController {
         return { status: false, message: "Length is zero" }
       }
 
+      if (time - foundUser.lastProtect < PROTECT_TIME) {
+        if (foundUser.isProtect) {
+          return { status: false, message: "User is protected", data: `${foundUser.login} под защитой еще ${msToTime(foundUser.lastProtect)}`} 
+        }
+      }
+
+      
+
       if (spiztedLength > updateFoundUser2.length) {
         spiztedLength = updateFoundUser2.length;
       }
@@ -225,6 +236,8 @@ class UserController {
       updateFoundUser2.length = length2;
 
       if (updateFoundUser1.length > foundUser.length) {
+        console.log(updateFoundUser1.lengthObrez);
+        console.log(spiztedLength);
         updateFoundUser1.obrezWin = updateFoundUser1.obrezWin + 1;
         updateFoundUser1.lengthObrez = updateFoundUser1.lengthObrez + spiztedLength
       } else {
@@ -293,6 +306,41 @@ class UserController {
       return topUsers;
     } catch (error) {
       console.log("Error getTopLengthObrez: ", error);
+    }
+  }
+
+  async getProtect (userId: number, chatId: number) {
+    try {
+      const chat = await Chat.findOne({telegram_id: chatId}).populate('users');
+      const users = chat.users;
+      const user = users.find((user: any) => user.telegram_id === userId);
+      
+      const time = new Date().getTime();
+
+      if (!user) {
+        return { status: false, message: "User not found"}
+      }
+
+      if (user.isProtect) {
+        return { status: false, message: "Protect already exists"}
+      }
+
+      const newUser = {
+        telegram_id: user.telegram_id,
+        login: user.login,
+        length: user.length,
+        lastgrow: user.lastgrow,
+        obrezWin: user.obrezWin,
+        lastObrez: user.lastObrez,
+        lengthObrez: user.lengthObrez,
+        lastProtect: time
+      }
+
+      await user.save();
+
+      return { status: true, message: "Set protect", data: newUser}
+    } catch (error) {
+      console.log("Error getDef: ", error);
     }
   }
 }
