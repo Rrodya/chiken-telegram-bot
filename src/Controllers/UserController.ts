@@ -2,11 +2,11 @@ import { log } from "console";
 import {Chat, User} from "../Models/User";
 import { msToTime, spiztedPenis } from "../module";
 
-const TIME = 36000000;
+const TIME = 3600000;
 // const TIME = 1000;
 // const OBREZ_TIME = 300000;
 // const OBREZ_TIME = 1000;
-const PROTECT_TIME = 3600000;
+const PROTECT_TIME = 7200000;
 
 interface IUser {
   id: number;
