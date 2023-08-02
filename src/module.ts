@@ -38,10 +38,10 @@ export function msToTime(duration: number) {
   return Strhours + ":" + Strminutes + ":" + Strseconds;
 }
 
-export function spiztedPenis(length1: number, length2: number, spiztedLength: number, id1: number, id2: number): 
+export function spiztedPenis(length1: number, length2: number, id1: number, id2: number): 
 { 
-  length1: number, 
-  length2: number, 
+  // length1: number, 
+  // length2: number, 
   winnerNum: number,
 } {
   const totalLength = length1 + length2;
@@ -49,27 +49,29 @@ export function spiztedPenis(length1: number, length2: number, spiztedLength: nu
 
   const randomValue = Math.random(); // Random value between 0 (inclusive) and 1 (exclusive)
   let chanceWin = 0.5
-  if(id2 == ADMIN_ID) {
-    console.log('id1')
-    chanceWin = 0.001;
-  } else if (id1 == ADMIN_ID) {
-    console.log('id1')
-    chanceWin = 0.999
-  }
 
-  if (randomValue < chanceWin) {
+  
+  // if(id2 == ADMIN_ID) {
+  //   console.log('id1')
+  //   chanceWin = 0.001;
+  // } else if (id1 == ADMIN_ID) {
+  //   console.log('id1')
+  //   chanceWin = 0.999
+  // }
+
+  if (randomValue > chance1) {
     // Increase length1 and decrease length2
     return {
       winnerNum: 1,
-      length1: length1 + spiztedLength,
-      length2: length2 - spiztedLength,
+      // length1: length1 + spiztedLength,
+      // length2: length2 - spiztedLength ,
     };
   } else {
     // Increase length2 and decrease length1
-    return {
+    return {    
       winnerNum: 2,  
-      length1: length1 - spiztedLength,
-      length2: length2 + spiztedLength,
+      // length1: length1 - spiztedLength,
+      // length2: length2 + spiztedLength,
     };
   }
 }

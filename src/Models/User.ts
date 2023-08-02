@@ -22,6 +22,10 @@ const ChatSchema = new mongoose.Schema({
   users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}]
 })
 
+const ItemsSchema = new mongoose.Schema({
+  name: { type: String, required: true, default: ""},
+
+})
 const Chat = mongoose.model("Chat", ChatSchema);
 
 export { User, Chat };

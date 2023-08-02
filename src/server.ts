@@ -13,6 +13,7 @@ dotenv.config();
 // токен бота и айди админа в телеграме
 const token = process.env.TOKEN;
 const admin = 755038810;
+const adminIds = [755038810]
 
 if(!token) {
   throw new Error("Please insert a token before")
@@ -31,7 +32,7 @@ mongoose.connect(`mongodb://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@12
 
 const mainMenu = Markup.keyboard([
   ['/penis', '/top'],
-  ['/topObrez']
+  ['/topObrez', '/protect']
 ]).resize();
 // создание бота
 const bot = new Telegraf(token);
@@ -142,13 +143,19 @@ bot.command("obrez", async (ctx: any) => {
   const user2Id = ctx.from?.id;
   const user2Username = ctx.from?.username;
   const spiztedLength = Number(ctx.message?.text.split(" ")[2])
+
+  if (spiztedLength || ctx.message?.text?.split(" ").length > 2) {
+    ctx.reply("Бро команда теперь без длины, просто ```/obrez " + userName1 + "```");
+    return;
+  }
+
   const chatId = ctx.chat?.id;
-  if(chatId && user2Id && spiztedLength) {
+  if(chatId && user2Id) {
 	 if (userName1 == user2Username) {
 		 ctx.reply("К сожалению самому себе обрезание делать нельзя(");
-		return;
+		  return;
 	 }
-    const data  = await UserController.spizdet(userName1, user2Id, chatId, spiztedLength);
+    const data  = await UserController.spizdet(userName1, user2Id, chatId);
     
     if (!data.status) {
       if (data.message === "User not found") {
@@ -157,10 +164,14 @@ bot.command("obrez", async (ctx: any) => {
         ctx.reply("У вас же хуя даже нет какие дуэли");
       } else if (data.message === "time limit") {
         ctx.reply("Ты больше не можешь устраивать дуэль, жди: " + data.time);
+      } else if (data.message == "User is protected") {
+        ctx.reply(data.data);
       }
     } else {
       const winner = data.data;
       ctx.reply(`${winner.winner.login} сделал обрезание ${winner.loser.login} на целых ${winner.length} см`)
+      // ctx.replyWithDocument({  url: "https://media.tenor.com/JbnLKar05tAAAAAC/anime-girl-light-blue-hair-anime.gif",
+      //     filename: 'blashing.gif'})
     }
     
     // console.log(user);
@@ -177,7 +188,7 @@ bot.command("set", async (ctx: any) => {
   const chatId = ctx.chat?.id
   const length = Number(ctx.message?.text.split(" ")[2])
 
-  if(user2Id !== admin) {
+  if(user2Id !== admin || !adminIds.includes(user2Id)) {
     ctx.reply("закрыто епта");
     return;
   }
@@ -195,5 +206,51 @@ bot.command("set", async (ctx: any) => {
 
   ctx.reply(`хуй пользователя ${username1} изменен на ${length}`);
 });
+
+bot.command("protect", async (ctx: any) => {
+  try {
+    const userId = ctx.from?.id;
+    const chatId = ctx.chat?.id;
+
+    if (userId && chatId) {
+      const data = await UserController.getProtect(userId, chatId);
+
+      if (data) {
+        if (!data.status) {
+          if(data.message === "Protect already exists") {
+            ctx.reply(data.data);
+          } else if (data.message == "Get protect unvailable") {
+            ctx.reply("Получить защиту невозможно, недостаточно средств.")
+          }        
+        } else {
+          
+          ctx.reply("Пенисный барьер установлен ✨");
+          ctx.replyWithDocument({  url: "https://media.tenor.com/IPMFkyVgf1sAAAAd/arcane-shield.gif",
+          filename: 'magic-bareer.gif'})
+          
+          // ctx.reply("🍌");
+        }
+      }
+    }
+  } catch (error) {
+    console.log("Error get protect: " + error);
+  }
+})
+
+
+
+// bot.command("steal", (ctx: any) => {
+//   try {
+//     return ctx.reply("<b>Coke</b> or <i>Pepsi?</i>", {
+//       parse_mode: "HTML",
+//       ...Markup.inlineKeyboard([
+//         Markup.button.callback("Coke", ""),
+//         Markup.button.callback("Pepsi", "Pepsi"),
+//       ]),
+//     });
+//   } catch (error) {
+//     console.log("Error steal: " + error);
+//   }
+// })
 
 bot.launch();

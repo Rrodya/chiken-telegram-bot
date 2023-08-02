@@ -2,11 +2,11 @@ import { log } from "console";
 import {Chat, User} from "../Models/User";
 import { msToTime, spiztedPenis } from "../module";
 
-// const TIME = 3600000;
-const TIME = 1000;
+const TIME = 36000000;
+// const TIME = 1000;
 // const OBREZ_TIME = 300000;
-const OBREZ_TIME = 1000;
-const PROTECT_TIME = 10000;
+// const OBREZ_TIME = 1000;
+const PROTECT_TIME = 7200000;
 
 interface IUser {
   id: number;
@@ -15,7 +15,8 @@ interface IUser {
   lastgrow?: number;
   obrezWin?: number;
   lastObrez? : number;
-  lengthObrez: number;
+  lengthObrez?: number;
+  lastProtect?: number;
 }
 
 class UserController { 
@@ -48,6 +49,7 @@ class UserController {
         obrezWin: 0,
         lastObrez: 0,
         lengthObrez: 0,
+        lastProtect: 0
       } 
 
 
@@ -104,6 +106,7 @@ class UserController {
         obrezWin: user.obrezWin || 0,
         lastObrez: user.lastObrez || 0,
         lengthObrez: user.lengthObrez || 0,
+        lastProtect: user.lastProtect || 0,
       }
       
       let change = updateUser.length;
@@ -163,7 +166,7 @@ class UserController {
     }
   }
 
-  async spizdet(username1: string, user2id: number, chatId: number, spiztedLength: number) {
+  async spizdet(username1: string, user2id: number, chatId: number) {
     try {
       const chat = await Chat.findOne({telegram_id: chatId}).populate("users");
       const users = chat.users;
@@ -175,8 +178,6 @@ class UserController {
         loser: {},
         length: 0,
       }
-
-      spiztedLength = Math.abs(Math.round(spiztedLength));
 
       if (!foundUser || !foundUser2) {
         return { status: false, message: "User not found"}
@@ -190,6 +191,7 @@ class UserController {
         obrezWin: foundUser.obrezWin,
         lastObrez: foundUser.lastObrez,
         lengthObrez: foundUser.lengthObrez,
+        lastProtect: foundUser.lastProtect
       }
 
       const updateFoundUser2 = {
@@ -200,37 +202,59 @@ class UserController {
         obrezWin: foundUser2.obrezWin,
         lastObrez: time,
         lengthObrez: foundUser2.lengthObrez,
+        lastProtect: foundUser2.lastProtect
       }
 
-      if (updateFoundUser2.lastObrez - foundUser2.lastObrez < OBREZ_TIME) {
-        return { status: false, message: "time limit", time: msToTime(OBREZ_TIME - (updateFoundUser2.lastObrez - foundUser2.lastObrez))}
+      const useObrezTime = foundUser2.length * 10000
+
+      if (updateFoundUser2.lastObrez - foundUser2.lastObrez < useObrezTime) {
+        return { status: false, message: "time limit", time: msToTime(useObrezTime - (updateFoundUser2.lastObrez - foundUser2.lastObrez))}
       }
 
       if(updateFoundUser1.length == 0 || updateFoundUser2.length == 0) {
         return { status: false, message: "Length is zero" }
       }
 
-      if (time - foundUser.lastProtect < PROTECT_TIME) {
-        if (foundUser.isProtect) {
-          return { status: false, message: "User is protected", data: `${foundUser.login} под защитой еще ${msToTime(foundUser.lastProtect)}`} 
-        }
+      if (time - foundUser.lastProtect < PROTECT_TIME) {        
+        return { status: false, message: "User is protected", data: `${foundUser.login} под пенисным барьером еще ${msToTime(PROTECT_TIME - (time - foundUser.lastProtect))}`} 
       }
 
       
 
-      if (spiztedLength > updateFoundUser2.length) {
-        spiztedLength = updateFoundUser2.length;
-      }
+      // if (spiztedLength > updateFoundUser2.length) {
+      //   spiztedLength = updateFoundUser2.length;
+      // }
 
-      if (spiztedLength > updateFoundUser1.length || spiztedLength > updateFoundUser2.length) {
-        if (updateFoundUser1.length > updateFoundUser2.length) {
-          spiztedLength = updateFoundUser2.length
-        } else {
-          spiztedLength = updateFoundUser1.length
-        }
-      }
+      // if (spiztedLength > updateFoundUser1.length || spiztedLength > updateFoundUser2.length) {
+      //   if (updateFoundUser1.length > updateFoundUser2.length) {
+      //     spiztedLength = updateFoundUser2.length
+      //   } else {
+      //     spiztedLength = updateFoundUser1.length
+      //   }
+      // }
 
-      const { length1, length2, winnerNum } = spiztedPenis(updateFoundUser1.length, updateFoundUser2.length, spiztedLength, foundUser.telegram_id, foundUser2.telegram_id);
+      const { winnerNum } = spiztedPenis(updateFoundUser1.length, updateFoundUser2.length, foundUser.telegram_id, foundUser2.telegram_id);
+
+
+      let length1 = updateFoundUser1.length;
+      let length2 = updateFoundUser2.length;
+
+      let winLength = winnerNum == 1 ? length2 : length1
+
+      const minValue = winLength * 0.1;
+      const maxValue = winLength * 0.5;
+
+      const spiztedLength = Math.round((Math.random() * (maxValue - minValue + 1)) + minValue);
+      console.log(spiztedLength);
+
+      if (winnerNum == 1) {
+        length1 = length1 + spiztedLength;
+        length2 = length2 - spiztedLength;
+      } else {
+        length1 = length1 - spiztedLength;
+        length2 = length2 + spiztedLength
+      }
+      
 
       updateFoundUser1.length = length1;
       updateFoundUser2.length = length2;
@@ -320,21 +344,41 @@ class UserController {
       if (!user) {
         return { status: false, message: "User not found"}
       }
-
-      if (user.isProtect) {
-        return { status: false, message: "Protect already exists"}
+      
+      // console.log(user.lastProtect);
+      // console.log(time);
+      // console.log(time - user.lastProtect);
+      // console.log(time - user.lastProtect < PROTECT_TIME);
+      console.log("--------")
+      console.log(time);
+      if (user.lastProtect && time - user.lastProtect < PROTECT_TIME) {
+        console.log(user.lastProtect);
+        console.log(time);
+        console.log(time - user.lastProtect)
+        return { status: false, message: "Protect already exists", data: `Защите все еще установленна. Действие закончится через ${msToTime(PROTECT_TIME - (time - user.lastProtect))}`}
       }
+
+      if (user.length < 10) {
+        return { status: false, message: "Get protect unvailable"};
+      }
+
+      const newLength = Math.round(user.length * 0.9);
 
       const newUser = {
         telegram_id: user.telegram_id,
         login: user.login,
-        length: user.length,
+        length: newLength,
         lastgrow: user.lastgrow,
         obrezWin: user.obrezWin,
         lastObrez: user.lastObrez,
         lengthObrez: user.lengthObrez,
         lastProtect: time
       }
+
+      console.log(newUser);
+      
+      const some = await User.findOneAndUpdate({telegram_id: newUser.telegram_id}, newUser);
+      console.log(some);
 
       await user.save();
 
@@ -343,6 +387,14 @@ class UserController {
       console.log("Error getDef: ", error);
     }
   }
+
+
 }
 
 export default new UserController();
+
+// 400
+// 800
+// 900
+
+// 800 - 1000 = -200
