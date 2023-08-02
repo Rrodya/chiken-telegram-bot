@@ -8,7 +8,7 @@ export function getRandomLength(): number {
     return -200;
   }
   // 1% chance for 200
-  else if (rand < 0.1) {
+  else if (rand < 0.01) {
     return 400;
   }
   

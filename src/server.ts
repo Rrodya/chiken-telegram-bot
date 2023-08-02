@@ -7,8 +7,8 @@ import { getRandomLength } from "./module";
 import mongoose from "mongoose";
 
 // добавление доступ к переменным
-// dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
-dotenv.config();
+dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
+// dotenv.config();
 
 // токен бота и айди админа в телеграме
 const token = process.env.TOKEN;
