@@ -6,7 +6,7 @@ const TIME = 36000000;
 // const TIME = 1000;
 // const OBREZ_TIME = 300000;
 // const OBREZ_TIME = 1000;
-const PROTECT_TIME = 7200000;
+const PROTECT_TIME = 3600000;
 
 interface IUser {
   id: number;
@@ -205,7 +205,7 @@ class UserController {
         lastProtect: foundUser2.lastProtect
       }
 
-      const useObrezTime = foundUser2.length * 10000
+      const useObrezTime = foundUser2.length * 5000
 
       if (updateFoundUser2.lastObrez - foundUser2.lastObrez < useObrezTime) {
         return { status: false, message: "time limit", time: msToTime(useObrezTime - (updateFoundUser2.lastObrez - foundUser2.lastObrez))}
