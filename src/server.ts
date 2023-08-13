@@ -3,21 +3,30 @@ const dotenv = require("dotenv");
 import messages from "./senc"
 import { Context, Markup, Telegraf, session, Scenes, Composer } from "telegraf";
 import UserController from "./Controllers/UserController"
-import { getRandomLength } from "./module";
+import { getRandomLength, msToTime } from "./module";
 import mongoose from "mongoose";
+const fs = require("fs");
 
 // добавление доступ к переменным
 dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
 // dotenv.config();
+try {
 
 // токен бота и айди админа в телеграме
 const token = process.env.TOKEN;
 const admin = 755038810;
 const adminIds = [755038810]
 
+const COMMAND_TIME_LIMIT = 1000;   // Time limit in milliseconds (1 second)
+const CONSECUTIVE_COMMAND_LIMIT = 5; // Number of consecutive rapid commands required for blocking
+const BLOCK_DURATION = 3600000;     
+
 if(!token) {
   throw new Error("Please insert a token before")
 }
+
+const data = {};
+
 
 // подключение к базе
 mongoose.connect(`mongodb://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@127.0.0.1:${process.env.PORT}`, { })
@@ -25,10 +34,16 @@ mongoose.connect(`mongodb://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@12
   .catch(err => console.error('Error connecting to database', err));
 
 
-// const keyMark = Markup.inlineKeyboard([
-//   Markup.button.url("❤️", "http://telegraf.js.org"),
-//   Markup.button.callback("➡️ Next", "next"),
-// ]),
+
+let userData: any = {};
+
+if (fs.existsSync('user_data.json')) {
+    userData = JSON.parse(fs.readFileSync('user_data.json', 'utf8'));
+}
+
+
+
+
 
 const mainMenu = Markup.keyboard([
   ['/penis', '/top'],
@@ -36,6 +51,42 @@ const mainMenu = Markup.keyboard([
 ]).resize();
 // создание бота
 const bot = new Telegraf(token);
+
+let counterCall = 0;
+
+// Middleware to handle command execution
+bot.use((ctx: any, next) => {
+  try {
+    let userData: any = {};
+    if (fs.existsSync('user_data.json')) {
+        userData = JSON.parse(fs.readFileSync('user_data.json', 'utf8'));
+    }
+  
+    const userId = ctx.from.id;
+    const currentTime = Date.now();
+    const user = userData[userId] || { timestamp: 0, messageCount: 0, timeLimit: 0, consecutiveCommands: 0, blockedUntil: 0 };
+    const timeDifference = currentTime - user.timestamp;
+    const beforeCall = user.timestamp
+
+    if (currentTime - beforeCall < 1000) {
+      return;
+    }
+  
+
+    user.timestamp = currentTime;
+    user.messageCount++;
+    user.timeLimit = COMMAND_TIME_LIMIT;
+    userData[userId] = user;
+    fs.writeFileSync('user_data.json', JSON.stringify(userData, null, 2));
+    
+    counterCall++;
+    // Continue to process the command
+    next();  
+  } catch (error) {
+    console.log("Error timeout")
+  }
+  
+});
 
 // команда запуска бота /start
 bot.start((ctx: Context) => {
@@ -51,9 +102,6 @@ bot.command('menu', (ctx) => {
 bot.help((ctx: Context) => {    
   ctx.reply(messages.help);
 });
-
-
-
 
 // penis команда для увеленчения длины
 bot.command("penis", async (ctx: Context) => {
@@ -254,3 +302,7 @@ bot.command("protect", async (ctx: any) => {
 // })
 
 bot.launch();
+
+} catch (error) {
+  console.log("Error: find bug")
+}

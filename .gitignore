@@ -4,3 +4,4 @@
 /dist
 .env
 /database-data
+./user_data.json
