@@ -2,14 +2,15 @@ const dotenv = require("dotenv");
 
 import messages from "./senc"
 import { Context, Markup, Telegraf, session, Scenes, Composer } from "telegraf";
+const { message } = require('telegraf/filters')
 import UserController from "./Controllers/UserController"
 import { getRandomLength, msToTime } from "./module";
 import mongoose from "mongoose";
 const fs = require("fs");
 
 // добавление доступ к переменным
-dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
-// dotenv.config();
+// dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
+dotenv.config();
 try {
 
 // токен бота и айди админа в телеграме
@@ -41,9 +42,8 @@ if (fs.existsSync('user_data.json')) {
     userData = JSON.parse(fs.readFileSync('user_data.json', 'utf8'));
 }
 
-
-
-
+const is_sleep = false;
+console.log(is_sleep);
 
 const mainMenu = Markup.keyboard([
   ['/penis', '/top'],
@@ -122,9 +122,9 @@ bot.command("penis", async (ctx: Context) => {
       const user = await UserController.create({id: id, login: login}, chatId);
       if(user.status == true) {
         // вызов модуля который вернет с 50% вероятностью отрицательное и положительное рандомное число от -1 до -15 и от 1 до 25
-        let change = getRandomLength();
+        
         // контроллер который обновит длину в базе данных для пользователя с id на длину length в чате chatId
-        const ans: any = await UserController.updateLength({length: change, id: id}, chatId);
+        const ans: any = await UserController.updateLength({id: id}, chatId);
 
         // вывод соотвествующего сообщения относительно того уменшилась или увеличилась длинна 
         if(ans.status == true) {
@@ -283,6 +283,12 @@ bot.command("protect", async (ctx: any) => {
   } catch (error) {
     console.log("Error get protect: " + error);
   }
+})
+
+bot.on(message('sticker'), (ctx: any) => {
+  console.log("got sticker");
+  console.log(ctx.message.sticker);
+  ctx.reply("got it")
 })
 
 

@@ -1,9 +1,10 @@
 import { log } from "console";
 import {Chat, User} from "../Models/User";
 import { msToTime, spiztedPenis } from "../module";
+import { getRandomLength } from "../module";
 
-const TIME = 3600000;
-// const TIME = 1000;
+// const TIME = 3600000;
+const TIME = 1000;
 // const OBREZ_TIME = 300000;
 // const OBREZ_TIME = 1000;
 const PROTECT_TIME = 7200000;
@@ -93,9 +94,10 @@ class UserController {
     }
   }
 
-  async updateLength(info: {length: number, id: number}, chatId: number) {
+  async updateLength(info: {id: number}, chatId: number) {
     try {
-      const { length, id } = info;
+      const { id } = info;
+      
       const chat = await Chat.findOne({telegram_id: chatId}).populate("users");
       const user = chat.users.find((u: any) => u.telegram_id === id);
       const updateUser = {
@@ -108,6 +110,11 @@ class UserController {
         lengthObrez: user.lengthObrez || 0,
         lastProtect: user.lastProtect || 0,
       }
+      console.log(user);
+      console.log("--")
+      console.log(user.length);
+      console.log("--")
+      let length = getRandomLength(updateUser.length);
       
       let change = updateUser.length;
       change = change + length;
