@@ -9,8 +9,8 @@ import mongoose from "mongoose";
 const fs = require("fs");
 
 // добавление доступ к переменным
-// dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
-dotenv.config();
+dotenv.config({path: '/var/www/chiken-telegram-bot/.env'});
+// dotenv.config();
 try {
 
 // токен бота и айди админа в телеграме
@@ -285,12 +285,26 @@ bot.command("protect", async (ctx: any) => {
   }
 })
 
-bot.on(message('sticker'), (ctx: any) => {
-  console.log("got sticker");
-  console.log(ctx.message.sticker);
-  ctx.reply("got it")
+bot.command('ruletka', (ctx: Context) => {
+  try {
+    const userId = ctx.from?.id;
+    const chatId = ctx.chat?.id;
+
+    if (userId && chatId) {
+
+    }
+  } catch (error) {
+    console.log("Error make ruletka: " + error);
+  }
 })
 
+bot.command('versions', (ctx: Context) => {
+  try {
+    
+  } catch (error) {
+    
+  }
+})
 
 
 // bot.command("steal", (ctx: any) => {
