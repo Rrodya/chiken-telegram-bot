@@ -9,7 +9,7 @@ All commands:
 your cutting chance - 50%) (You - 50cm, Your enemy - 100%, your cutting chance - 75%)
 - `/protect` this will be set bareer on your penis and will be protect your penis from obrect on 1 hour. Cost - 10% of your length.
 
-Here's (2nd version telegram bot)[https://github.com/Rrodya/chicken-bot-telegram-2] with more clean architecture.
+Here's [2nd version telegram bot](https://github.com/Rrodya/chicken-bot-telegram-2) with more clean architecture.
 
 - Nodejs
 - Telegraf
